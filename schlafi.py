@@ -30,23 +30,53 @@ def kwRestore(message):
     file=requests.get(url.url)
     settings=file.json()
     saveConfig("config.json")
+
+
+def kwReset(message):
+    global optionals
+    optionals=getDefaultOptionals()
+
+
+
+#########################
+#all the stuff goes here#
+#########################
+
 funcs={
-    "help": kwHelp,
-    "quote": kwQuote
+    "help"  : kwHelp,
+    "quote" : kwQuote,
+    "reset" : kwReset
 }
 
+
+
+def getDefaultOptionals():
+    optionals={}
+    optionals["lastmsg"]="Error loading quote"
+    optionals["lasttime"]=(0,0)
+    optionals["fallbackmsg"]=["Error loading quote"]
+
 def loadConfig(name):
+    #create the default optionals
+    
     try:
-        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf
+        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals
         with open(name, "r") as f:
             settings=json.load(f)
         token=settings["token"]
         wakechan=settings["wakechan"]
         botchan=settings["botchan"]
         prefix=settings["prefix"]
-        lastmsg=settings["lastmsg"]
+       
         fallbackmsg=settings["fallbackmsg"]
         validconf=settings["validconf"]
+        optionals=getDefaultOptionals()
+        if "optionals" in settings:
+            for i in settings["optionals"]
+                optionals[i]=settings["optionals"][i]:
+        lastmsg=optionals["lastmsg"]
+        quotetime=optionals["lasttime"]
+        
     except:
         validconf=0
         configCreator()
@@ -60,33 +90,36 @@ def configCreator():
         botchan=input("Please enter the channel ID of the bot channel: ")
         wakechan=input("Please enter the channel ID of the wake channel: ")
         prefix=input("Please enter the prefix for the bot: ")
-        lastmsg="Default quote"
-        fallbackmsg=["no fall back message"]
+        optionals=getDefaultOptionals()
         msg=""
         
         saveConfig("config.json")
        
     else:
         print("""
-        No config file found.
-        Please put a config file in the same directory as the bot.
+No config file found.
+Please put a config file in the same directory as the bot.
                     """)
-def saveConfig(name):
+def saveConfig(name,generateOptionals=1):
     print("saving...")
-    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf
+    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals
     settings={}
     settings["token"]=token
     settings["wakechan"]=wakechan
     settings["botchan"]=botchan
     settings["prefix"]=prefix
-    settings["lastmsg"]=msg
-    settings["fallbackmsg"]=fallbackmsg
     settings["validconf"]=1
+    #generate the optionals
+    if generateOptionals:
+        optionals["lastmsg"]=msg
+        optionals["lasttime"]=quoteTime
+        optionals["fallbackmsg"]=fallbackmsg
+    settings["optionals"]=optionals
     print(settings)
     with open(name, "w") as f:
         json.dump(settings, f)
     print("saved!")
-
+quoteTime={0,0}
 #intents=discord.Intents.all()
 loadConfig("config.json")
 #client = discord.Bot()
