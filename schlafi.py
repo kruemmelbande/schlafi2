@@ -72,8 +72,8 @@ def loadConfig(name):
         validconf=settings["validconf"]
         optionals=getDefaultOptionals()
         if "optionals" in settings:
-            for i in settings["optionals"]
-                optionals[i]=settings["optionals"][i]:
+            for i in settings["optionals"]:
+                optionals[i]=settings["optionals"][i]
         lastmsg=optionals["lastmsg"]
         quotetime=optionals["lasttime"]
         
