@@ -17,6 +17,12 @@ def kwQuote(message):
     global quote
     quote=message.contents.split("quote")[1]
     return 0
+
+def kwSetTime(message):
+    global quoteTime
+    tmp=message.contents.split("settime")[1].strip()
+    quoteTime=tmp.split(":")
+    quoteTime=[int(i) for i in quoteTime]
     
 def kwBackup(message):
     #send the config file to the bot channel
@@ -55,6 +61,7 @@ def getDefaultOptionals():
     optionals["lastmsg"]="Error loading quote"
     optionals["lasttime"]=(0,0)
     optionals["fallbackmsg"]=["Error loading quote"]
+    return optionals
 
 def loadConfig(name):
     #create the default optionals
@@ -68,16 +75,20 @@ def loadConfig(name):
         botchan=settings["botchan"]
         prefix=settings["prefix"]
        
-        fallbackmsg=settings["fallbackmsg"]
+        #fallbackmsg=settings["fallbackmsg"]
         validconf=settings["validconf"]
         optionals=getDefaultOptionals()
         if "optionals" in settings:
             for i in settings["optionals"]:
-                optionals[i]=settings["optionals"][i]
+                try:
+                    optionals[i]=settings["optionals"][i]
+                except:
+                    continue
         lastmsg=optionals["lastmsg"]
         quotetime=optionals["lasttime"]
         
-    except:
+    except Exception as e:
+        print(e,e.traceback)
         validconf=0
         configCreator()
 
@@ -86,9 +97,9 @@ def configCreator():
     global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,msg
     settings={}
     if input("Do you want to create a full config file?")=="y":
-        token=input("Please enter your bot token: ")
-        botchan=input("Please enter the channel ID of the bot channel: ")
-        wakechan=input("Please enter the channel ID of the wake channel: ")
+        token=input("Please enter your bot token: ").strip()
+        botchan=int(input("Please enter the channel ID of the bot channel: "))
+        wakechan=int(input("Please enter the channel ID of the wake channel: "))
         prefix=input("Please enter the prefix for the bot: ")
         optionals=getDefaultOptionals()
         msg=""
@@ -110,22 +121,27 @@ def saveConfig(name,generateOptionals=1):
     settings["prefix"]=prefix
     settings["validconf"]=1
     #generate the optionals
-    if generateOptionals:
-        optionals["lastmsg"]=msg
-        optionals["lasttime"]=quoteTime
-        optionals["fallbackmsg"]=fallbackmsg
+    optionals=getDefaultOptionals()
+    try:
+        if generateOptionals:
+            optionals["lastmsg"]=msg
+            optionals["lasttime"]=quoteTime
+            optionals["fallbackmsg"]=fallbackmsg
+    except:
+        print("Not generating optionals")
     settings["optionals"]=optionals
     print(settings)
     with open(name, "w") as f:
         json.dump(settings, f)
     print("saved!")
-quoteTime={0,0}
+quoteTime=[0,0]
 #intents=discord.Intents.all()
 loadConfig("config.json")
 #client = discord.Bot()
 intents = discord.Intents.default()
 intents.message_content = True
 intents.emojis_and_stickers = True
+intents.auto_moderation_configuration()
 #intents.all=True
 client = discord.Client(intents=intents)
 @client.event
@@ -144,5 +160,25 @@ async def on_message(message):
     if message.content.startswith(prefix):
         await funcs[message.content[len(prefix):].split(" ")[0]](message)
         
+async def quotesend():#this is the function which sends the quote at the right time
+    await client.wait_until_ready()
+    await asyncio.sleep(10)
+    global quote, quoteTime,sendnow
 
+    while not client.is_closed():
+        now=datetime.datetime.now()
+        if (now.hour==int(quoteTime[0]) and now.minute==int(quoteTime[1])):
+            sendnow=0
+            print("sending quote")
+            await wakechan.send(str( quote))
+            #quote=random.choice(default_quotes)
+            print("quote sent")
+            await asyncio.sleep(61)
+        else:
+            await asyncio.sleep(1)
+            print(now.hour,"|",now.minute,"|", now.second, "\t|", quoteTime[0],"|",quoteTime[1],end="\r")
+
+quoteSendActive=1
+if quoteSendActive:
+    client.loop.create_task(quotesend())
 client.run(token)
