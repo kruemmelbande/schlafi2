@@ -13,23 +13,26 @@ The available commands are:
     """
     await bottie.send(out)
 
-def kwQuote(message):
-    global quote
-    quote=message.contents.split("quote")[1]
+async def kwQuote(message):
+    global quote, bottie
+    quote=message.content.split("quote")[1]
+    print("Quote set to ", quote)
+    await bottie.send(f"Quote set to {quote}")    	
     return 0
 
-def kwSetTime(message):
-    global quoteTime
-    tmp=message.contents.split("settime")[1].strip()
+async def kwSetTime(message):
+    global quoteTime, bottie
+    tmp=message.content.lower().split("settime")[1].strip()
     quoteTime=tmp.split(":")
     quoteTime=[int(i) for i in quoteTime]
+    await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
     
-def kwBackup(message):
+async def kwBackup(message):
     #send the config file to the bot channel
     global bottie
     bottie.send_file(botchan, "config.json")
     
-def kwRestore(message):
+async def kwRestore(message):
     global settings
     #downloads the config file 
     url=message.attachments[0]
@@ -38,7 +41,7 @@ def kwRestore(message):
     saveConfig("config.json")
 
 
-def kwReset(message):
+async def kwReset(message):
     global optionals
     optionals=getDefaultOptionals()
 
@@ -49,9 +52,10 @@ def kwReset(message):
 #########################
 
 funcs={
-    "help"  : kwHelp,
-    "quote" : kwQuote,
-    "reset" : kwReset
+    "help"      : kwHelp,
+    "quote"     : kwQuote,
+    "reset"     : kwReset,
+    "setTime"   : kwSetTime
 }
 
 
@@ -141,7 +145,7 @@ loadConfig("config.json")
 intents = discord.Intents.default()
 intents.message_content = True
 intents.emojis_and_stickers = True
-intents.auto_moderation_configuration()
+intents.auto_moderation_configuration=True
 #intents.all=True
 client = discord.Client(intents=intents)
 @client.event
@@ -163,14 +167,15 @@ async def on_message(message):
 async def quotesend():#this is the function which sends the quote at the right time
     await client.wait_until_ready()
     await asyncio.sleep(10)
-    global quote, quoteTime,sendnow
+    global quote, quoteTime,sendnow, bottie, wakie
 
     while not client.is_closed():
         now=datetime.datetime.now()
         if (now.hour==int(quoteTime[0]) and now.minute==int(quoteTime[1])):
             sendnow=0
             print("sending quote")
-            await wakechan.send(str( quote))
+            await wakie.send(str( quote))
+            await bottie.send("Quote sent!")
             #quote=random.choice(default_quotes)
             print("quote sent")
             await asyncio.sleep(61)
