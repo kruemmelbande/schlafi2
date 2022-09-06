@@ -92,7 +92,7 @@ def loadConfig(name):
         quotetime=optionals["lasttime"]
         
     except Exception as e:
-        print(e,e.traceback)
+        print(e)
         validconf=0
         configCreator()
 
