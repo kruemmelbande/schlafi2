@@ -17,6 +17,7 @@ async def kwQuote(message):
     quote=message.content.split("quote")[1]
     print("Quote set to ", quote)
     await bottie.send(f"Quote set to {quote}")    	
+    saveConfig("config.json")
     return 0
 
 async def kwSetTime(message):
@@ -24,12 +25,15 @@ async def kwSetTime(message):
     tmp=message.content.lower().split("settime")[1].strip()
     quoteTime=tmp.split(":")
     quoteTime=[int(i) for i in quoteTime]
+    saveConfig("config.json")
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
     
 async def kwBackup(message):
     #send the config file to the bot channel
     global bottie
-    bottie.send_file(botchan, "config.json")
+    saveConfig("config.json")
+    await bottie.send("Sending backup...")
+    await bottie.send(file=discord.File("config.json"))
     
 async def kwRestore(message):
     global settings
@@ -54,6 +58,7 @@ async def kwReset(message):
 
 async def kwExit(message):
     await message.channel.send("Exiting...")
+    saveConfig("config.json")
     sys.exit()
     
 
@@ -87,7 +92,7 @@ def loadConfig(name):
     #create the default optionals
     
     try:
-        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals
+        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime
         with open(name, "r") as f:
             settings=json.load(f)
         token=settings["token"]
@@ -105,7 +110,7 @@ def loadConfig(name):
                 except:
                     continue
         lastmsg=optionals["lastmsg"]
-        quotetime=optionals["lasttime"]
+        quoteTime=optionals["lasttime"]
         
     except Exception as e:
         print(e)
@@ -133,7 +138,7 @@ Please put a config file in the same directory as the bot.
  """)
 def saveConfig(name,generateOptionals=1):
     print("saving...")
-    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals
+    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals, quote
     settings={}
     settings["token"]=token
     settings["wakechan"]=wakechan
@@ -144,9 +149,11 @@ def saveConfig(name,generateOptionals=1):
     optionals=getDefaultOptionals()
     try:
         if generateOptionals:
-            optionals["lastmsg"]=msg
+            print("Trying to generate optionals...")
             optionals["lasttime"]=quoteTime
+            optionals["lastmsg"]=quote
             optionals["fallbackmsg"]=fallbackmsg
+            print("Optionals generated!")
     except:
         print("Not generating optionals")
     settings["optionals"]=optionals
