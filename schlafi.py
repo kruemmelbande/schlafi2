@@ -156,8 +156,8 @@ async def on_ready():
 
     bottie=client.get_channel(int(botchan))
     wakie=client.get_channel(int(wakechan))
-    print(f'logged in as {client.user}')
-    await bottie.send(f' logged in as {client.user}')
+    print(f' logged in as {client.user} \n To get started type `{prefix}help`')
+    await bottie.send(f' logged in as `{client.user}` \n To get started type `{prefix}help`')
 @client.event
 async def on_message(message):
     if message.author == client.user:
