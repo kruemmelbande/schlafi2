@@ -1,5 +1,4 @@
-from glob import glob
-import json, discord, requests, os, time, random, datetime,asyncio
+import json, discord, requests, os, time, random, datetime,asyncio, sys
 
 
 async def kwHelp(message):
@@ -53,6 +52,10 @@ async def kwReset(message):
     global optionals
     optionals=getDefaultOptionals()
 
+async def kwExit(message):
+    await message.channel.send("Exiting...")
+    sys.exit()
+    
 
 
 #########################
@@ -66,7 +69,8 @@ funcs={
     "setTime"   : kwSetTime,
     "restore"   : kwRestore,
     "backup"    : kwBackup,
-    "bash"      : kwBash
+    "bash"      : kwBash,
+    "exit"      : kwExit
 
 }
 
