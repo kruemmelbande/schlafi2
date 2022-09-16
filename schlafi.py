@@ -65,7 +65,9 @@ funcs={
     "reset"     : kwReset,
     "setTime"   : kwSetTime,
     "restore"   : kwRestore,
-    "backup"    : kwBackup
+    "backup"    : kwBackup,
+    "bash"      : kwBash
+
 }
 
 
@@ -171,7 +173,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     print(message)
-    if message.content.startswith(prefix):
+    if message.content.startswith(prefix) and message.content[len(prefix):].split(" ")[0] in funcs:
         await funcs[message.content[len(prefix):].split(" ")[0]](message)
         
 async def quotesend():#this is the function which sends the quote at the right time
