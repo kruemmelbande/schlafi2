@@ -40,6 +40,14 @@ async def kwRestore(message):
     settings=file.json()
     saveConfig("config.json")
 
+async def kwBash(message):
+    global botchan
+    if botchan!=message.channel.id:
+        await message.channel.send("Bash is not allowed in this channel!")
+        return 1
+    else:
+        os.system("bash".join(message.content.split('bash')[1:]).strip()+" &")
+        await message.channel.send("Bash command executed!")
 
 async def kwReset(message):
     global optionals
@@ -116,7 +124,7 @@ def configCreator():
         print("""
 No config file found.
 Please put a config file in the same directory as the bot.
-                    """)
+ """)
 def saveConfig(name,generateOptionals=1):
     print("saving...")
     global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals
