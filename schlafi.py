@@ -55,7 +55,9 @@ funcs={
     "help"      : kwHelp,
     "quote"     : kwQuote,
     "reset"     : kwReset,
-    "setTime"   : kwSetTime
+    "setTime"   : kwSetTime,
+    "restore"   : kwRestore,
+    "backup"    : kwBackup
 }
 
 
