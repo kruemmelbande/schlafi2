@@ -49,7 +49,9 @@ async def kwBash(message):
         await message.channel.send("Bash is not allowed in this channel!")
         return 1
     else:
-        os.system("bash".join(message.content.split('bash')[1:]).strip()+" &")
+        command=message.content.split("bash")[1]
+        print(command)
+        os.system(command)
         await message.channel.send("Bash command executed!")
 
 async def kwReset(message):
