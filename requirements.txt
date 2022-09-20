@@ -1,1 +1,4 @@
+#On windows, py-cord depends on Microsoft C++ build tools, which must be installed, or else the installation will fail.
+#The tools are available at: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 py-cord
+requests
