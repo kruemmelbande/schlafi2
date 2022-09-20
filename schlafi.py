@@ -23,7 +23,10 @@ async def kwQuote(message):
 async def kwSetTime(message):
     global quoteTime, bottie
     tmp=message.content.lower().split("settime")[1].strip()
+    tmp=tmp.replace("am","")
     quoteTime=tmp.split(":")
+    if "pm" in quoteTime[1]:
+        quoteTime[1]=int(quoteTime[1].replace("pm",""))+12#
     quoteTime=[int(i) for i in quoteTime]
     saveConfig("config.json")
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
