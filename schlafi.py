@@ -199,6 +199,7 @@ async def quotesend():#this is the function which sends the quote at the right t
         if (now.hour==int(quoteTime[0]) and now.minute==int(quoteTime[1])):
             sendnow=0
             print("sending quote")
+            await bottie.send("Sending quote...")
             await wakie.send(str( quote))
             await bottie.send("Quote sent!")
             #quote=random.choice(default_quotes)
