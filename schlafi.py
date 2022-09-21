@@ -28,30 +28,39 @@ async def kwSetTime(message):
     if "pm" in quoteTime[1]:
         print("Converting from 12 to 24h...")
         quoteTime[0]=int(quoteTime[0])+12
-        quoteTime[1]=quoteTime.replace("pm","")
-    quoteTime=[int(i) for i in quoteTime]
+        quoteTime[1]=int(quoteTime.replace("pm",""))
+    else:
+        quoteTime=[int(i) for i in quoteTime]
     saveConfig("config.json")
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
     
 async def kwBackup(message):
-    #send the config file to the bot channel
-    global bottie
-    saveConfig("config.json")
-    await bottie.send("Sending backup...")
-    await bottie.send(file=discord.File("config.json"))
+    if isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
+        return 1
+    else:
+        #send the config file to the bot channel
+        global bottie
+        saveConfig("config.json")
+        await bottie.send("Sending backup...")
+        await bottie.send(file=discord.File("config.json"))
     
 async def kwRestore(message):
     global settings
-    #downloads the config file 
-    url=message.attachments[0]
-    file=requests.get(url.url)
-    settings=file.json()
-    saveConfig("config.json")
+    if isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
+        return 1
+    else:
+        #downloads the config file 
+        url=message.attachments[0]
+        file=requests.get(url.url)
+        settings=file.json()
+        saveConfig("config.json")
 
 async def kwBash(message):
     global botchan
-    if botchan!=message.channel.id:
-        await message.channel.send("Bash is not allowed in this channel!")
+    if isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
         command=message.content.split("bash")[1]
@@ -64,9 +73,13 @@ async def kwReset(message):
     optionals=getDefaultOptionals()
 
 async def kwExit(message):
-    await message.channel.send("Exiting...")
-    saveConfig("config.json")
-    sys.exit()
+    if isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
+        return 1
+    else:
+        await message.channel.send("Exiting...")
+        saveConfig("config.json")
+        sys.exit()
     
 
 
@@ -87,6 +100,9 @@ funcs={
 }
 
 
+def isInBotchan(message):
+    global botchan
+    return botchan==message.channel.id
 
 def getDefaultOptionals():
     optionals={}
@@ -99,7 +115,7 @@ def loadConfig(name):
     #create the default optionals
     
     try:
-        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime
+        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime, quote
         with open(name, "r") as f:
             settings=json.load(f)
         token=settings["token"]
@@ -116,7 +132,7 @@ def loadConfig(name):
                     optionals[i]=settings["optionals"][i]
                 except:
                     continue
-        lastmsg=optionals["lastmsg"]
+        quote=optionals["lastmsg"]
         quoteTime=optionals["lasttime"]
         
     except Exception as e:
