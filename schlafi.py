@@ -73,31 +73,35 @@ async def kwReset(message):
     optionals=getDefaultOptionals()
 
 async def addFallback(message):
-    global optionals
+    global fallbackmsg
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        optionals["fallbackmsg"].append(message.content.split("addfallback")[1])
+        fallbackmsg.append(message.content.split("addFallback")[1])
         saveConfig("config.json")
         await message.channel.send("Added fallback message!")
+    
 async def listFallbacks(message):
-    global optionals
+    global fallbackmsg
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        await message.channel.send(f"Current fallback messages: {enumerate(optionals['fallbackmsg'])}")
+        msg="Fallback messages:"
+        for i in enumerate(fallbackmsg):
+            msg+=f"\n{i[0]}: {i[1]}"
+        await message.channel.send(f"Current fallback messages:``` {msg}```")
         
 async def kwRemoveFallback(message):
-    global optionals
+    global fallbackmsg
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
         try:
-            optionals["fallbackmsg"].remove(int(message.content.split("removefallback")[1]))
-            saveConfig("config.json")
+            index=int(message.content.split("removeFallback")[1])
+            fallbackmsg.pop(index)
             await message.channel.send("Removed fallback message!")
         except:
             await message.channel.send("Message not found!")
@@ -125,10 +129,15 @@ funcs={
     "restore"   : kwRestore,
     "backup"    : kwBackup,
     "bash"      : kwBash,
-    "exit"      : kwExit
-
+    "exit"      : kwExit,
+    "addFallback": addFallback,
+    "removeFallback": kwRemoveFallback,
+    "listFallback": listFallbacks
 }
 
+def regenerateQuote():
+    global quote, fallbackmsg
+    quote=random.choice(fallbackmsg)
 
 def isInBotchan(message):
     global botchan
@@ -167,7 +176,7 @@ def loadConfig(name):
                     continue
         quote=optionals["lastmsg"]
         quoteTime=optionals["lasttime"]
-        
+        fallbackmsg=optionals["fallbackmsg"]
     except Exception as e:
         print(e)
         validconf=0
@@ -210,8 +219,8 @@ def saveConfig(name,generateOptionals=1):
             optionals["lastmsg"]=quote
             optionals["fallbackmsg"]=fallbackmsg
             print("Optionals generated!")
-    except:
-        print("Not generating optionals")
+    except Exception as e:
+        print(f"Not generating optionals, {e}")
     settings["optionals"]=optionals
     print(settings)
     with open(name, "w") as f:
@@ -239,7 +248,7 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    print(message)
+    #print(message)
     if message.content.startswith(prefix) and message.content[len(prefix):].split(" ")[0] in funcs:
         await funcs[message.content[len(prefix):].split(" ")[0]](message)
         
@@ -256,7 +265,9 @@ async def quotesend():#this is the function which sends the quote at the right t
             await bottie.send("Sending quote...")
             try:
                 await wakie.send(str( quote))
-                await bottie.send("Quote sent!")
+                await bottie.send("Quote sent, regenerating...")
+                regenerateQuote()
+                await bottie.send("New quote: "+str(quote))
             except Exception as e:
                 await bottie.send(f"Error sending quote: {e}")
             #quote=random.choice(default_quotes)
