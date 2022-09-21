@@ -28,7 +28,7 @@ async def kwSetTime(message):
     if "pm" in quoteTime[1]:
         print("Converting from 12 to 24h...")
         quoteTime[0]=int(quoteTime[0])+12
-        quoteTime[1]=int(quoteTime.replace("pm",""))
+        quoteTime[1]=int(quoteTime[1].replace("pm",""))
     else:
         quoteTime=[int(i) for i in quoteTime]
     saveConfig("config.json")
