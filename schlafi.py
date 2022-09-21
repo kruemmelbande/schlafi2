@@ -25,13 +25,12 @@ async def kwSetTime(message):
     global quoteTime, bottie
     tmp=message.content.lower().split("settime")[1].strip()
     tmp=tmp.replace("am","")
-    quoteTime=tmp.split(":")
-    if "pm" in quoteTime[1]:
+    tmpQuoteTime=tmp.split(":")
+    if "pm" in tmpQuoteTime[1]:
         print("Converting from 12 to 24h...")
-        quoteTime[0]=int(quoteTime[0])+12
-        quoteTime[1]=int(quoteTime[1].replace("pm",""))
-    else:
-        quoteTime=[int(i) for i in quoteTime]
+        tmpQuoteTime[0]=int(tmpQuoteTime[0])+12
+        tmpQuoteTime[1]=int(tmpQuoteTime[1].replace("pm",""))
+    quoteTime=[int(i) for i in tmpQuoteTime]
     saveConfig("config.json")
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
     
