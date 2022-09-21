@@ -35,7 +35,7 @@ async def kwSetTime(message):
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
     
 async def kwBackup(message):
-    if isInBotchan(message):
+    if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
@@ -47,7 +47,7 @@ async def kwBackup(message):
     
 async def kwRestore(message):
     global settings
-    if isInBotchan(message):
+    if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
@@ -59,7 +59,7 @@ async def kwRestore(message):
 
 async def kwBash(message):
     global botchan
-    if isInBotchan(message):
+    if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
@@ -103,7 +103,7 @@ funcs={
 def isInBotchan(message):
     global botchan
     re=int(botchan)==int(message.channel.id)
-    if re:
+    if not re:
         print(f"missmatch: {botchan} vs {message.channel.id}")
     return re
 
