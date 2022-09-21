@@ -102,7 +102,7 @@ funcs={
 
 def isInBotchan(message):
     global botchan
-    re=botchan==message.channel.id
+    re=int(botchan)==int(message.channel.id)
     if re:
         print(f"missmatch: {botchan} vs {message.channel.id}")
     return re
