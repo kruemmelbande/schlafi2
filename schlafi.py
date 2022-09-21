@@ -72,8 +72,38 @@ async def kwReset(message):
     global optionals
     optionals=getDefaultOptionals()
 
+async def addFallback(message):
+    global optionals
+    if not isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
+        return 1
+    else:
+        optionals["fallbackmsg"].append(message.content.split("addfallback")[1])
+        saveConfig("config.json")
+        await message.channel.send("Added fallback message!")
+async def listFallbacks(message):
+    global optionals
+    if not isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
+        return 1
+    else:
+        await message.channel.send(f"Current fallback messages: {enumerate(optionals['fallbackmsg'])}")
+        
+async def kwRemoveFallback(message):
+    global optionals
+    if not isInBotchan(message):
+        await message.channel.send("Command is not allowed in this channel!")
+        return 1
+    else:
+        try:
+            optionals["fallbackmsg"].remove(int(message.content.split("removefallback")[1]))
+            saveConfig("config.json")
+            await message.channel.send("Removed fallback message!")
+        except:
+            await message.channel.send("Message not found!")
+            
 async def kwExit(message):
-    if isInBotchan(message):
+    if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
