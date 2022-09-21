@@ -26,7 +26,9 @@ async def kwSetTime(message):
     tmp=tmp.replace("am","")
     quoteTime=tmp.split(":")
     if "pm" in quoteTime[1]:
-        quoteTime[1]=int(quoteTime[1].replace("pm",""))+12#
+        print("Converting from 12 to 24h...")
+        quoteTime[0]=int(quoteTime[0])+12
+        quoteTime[1]=quoteTime.replace("pm","")
     quoteTime=[int(i) for i in quoteTime]
     saveConfig("config.json")
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
@@ -203,8 +205,11 @@ async def quotesend():#this is the function which sends the quote at the right t
             sendnow=0
             print("sending quote")
             await bottie.send("Sending quote...")
-            await wakie.send(str( quote))
-            await bottie.send("Quote sent!")
+            try:
+                await wakie.send(str( quote))
+                await bottie.send("Quote sent!")
+            except Exception as e:
+                await bottie.send(f"Error sending quote: {e}")
             #quote=random.choice(default_quotes)
             print("quote sent")
             await asyncio.sleep(61)
