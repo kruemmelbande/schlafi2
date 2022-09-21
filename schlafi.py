@@ -84,7 +84,7 @@ async def addFallback(message):
         await message.channel.send("Added fallback message!")
         msg=""
         for i in enumerate(fallbackmsg):
-            msg+=f"\n{i[0]}: {i[1]}"
+            msg+=f"{i[0]}: {i[1]}\n"
         await message.channel.send(f"Current fallback messages:``` {msg}```")
 async def listFallbacks(message):
     global fallbackmsg
@@ -94,7 +94,7 @@ async def listFallbacks(message):
     else:
         msg=""
         for i in enumerate(fallbackmsg):
-            msg+=f"\n{i[0]}: {i[1]}"
+            msg+=f"{i[0]}: {i[1]}\n"
         await message.channel.send(f"Current fallback messages:``` {msg}```")
         
 async def kwRemoveFallback(message):
@@ -109,7 +109,7 @@ async def kwRemoveFallback(message):
             await message.channel.send("Removed fallback message!")
             msg=""
             for i in enumerate(fallbackmsg):
-                msg+=f"\n{i[0]}: {i[1]}"
+                msg+=f"{i[0]}: {i[1]}\n"
             await message.channel.send(f"Current fallback messages:``` {msg}```")
         except Exception:
             await message.channel.send("Message not found!")
