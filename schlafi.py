@@ -2,14 +2,15 @@ import json, discord, requests, os, time, random, datetime,asyncio, sys
 
 
 async def kwHelp(message):
-    global bottie
+    global bottie, funcs, doc
     nl="\n"
-    out=f"""
-The available commands are:
-```
-{nl.join(funcs)}
-```
-    """
+    out="The available commands are:```"
+    for i in funcs:
+        if i in doc:
+            out+=f"{i} \t: {doc[i]}\n"
+        else:
+            out+=f"{i}\n"
+    out+="```"
     await bottie.send(out)
 
 async def kwQuote(message):
@@ -81,14 +82,17 @@ async def addFallback(message):
         fallbackmsg.append(message.content.split("addFallback")[1])
         saveConfig("config.json")
         await message.channel.send("Added fallback message!")
-    
+        msg=""
+        for i in enumerate(fallbackmsg):
+            msg+=f"\n{i[0]}: {i[1]}"
+        await message.channel.send(f"Current fallback messages:``` {msg}```")
 async def listFallbacks(message):
     global fallbackmsg
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        msg="Fallback messages:"
+        msg=""
         for i in enumerate(fallbackmsg):
             msg+=f"\n{i[0]}: {i[1]}"
         await message.channel.send(f"Current fallback messages:``` {msg}```")
@@ -103,7 +107,11 @@ async def kwRemoveFallback(message):
             index=int(message.content.split("removeFallback")[1])
             fallbackmsg.pop(index)
             await message.channel.send("Removed fallback message!")
-        except:
+            msg=""
+            for i in enumerate(fallbackmsg):
+                msg+=f"\n{i[0]}: {i[1]}"
+            await message.channel.send(f"Current fallback messages:``` {msg}```")
+        except Exception:
             await message.channel.send("Message not found!")
             
 async def kwExit(message):
@@ -130,10 +138,25 @@ funcs={
     "backup"    : kwBackup,
     "bash"      : kwBash,
     "exit"      : kwExit,
-    "addFallback": addFallback,
-    "removeFallback": kwRemoveFallback,
-    "listFallback": listFallbacks
+    "fbAdd": addFallback,
+    "fbRm": kwRemoveFallback,
+    "fbLs": listFallbacks
 }
+
+doc={
+    "help"      : "Shows this message",
+    "quote"     : "Sets the quote to be displayed",
+    "reset"     : "Partly resets the bot to default settings",
+    "setTime"   : "Sets the time when the quote is displayed",
+    "restore"   : "Restores the config file from a backup",
+    "backup"    : "Sends a backup of the config file to the bot channel",
+    "bash"      : "Executes a bash command",
+    "exit"      : "Exits the bot",
+    "fbAdd": "Adds a fallback message",
+    "fbRm": "Removes a fallback message",
+    "fbLs": "Lists all fallback messages"
+}
+
 
 def regenerateQuote():
     global quote, fallbackmsg
