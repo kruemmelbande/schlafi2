@@ -79,7 +79,7 @@ async def addFallback(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        fallbackmsg.append(message.content.split("addFallback")[1])
+        fallbackmsg.append(message.content.strip().split(" ")[1])
         saveConfig("config.json")
         await message.channel.send("Added fallback message!")
         msg=""
@@ -104,7 +104,7 @@ async def kwRemoveFallback(message):
         return 1
     else:
         try:
-            index=int(message.content.split("removeFallback")[1])
+            index=int(message.content.strip().split(" ")[1])
             fallbackmsg.pop(index)
             await message.channel.send("Removed fallback message!")
             msg=""
