@@ -137,9 +137,9 @@ funcs={
     "backup"    : kwBackup,
     "bash"      : kwBash,
     "exit"      : kwExit,
-    "fbAdd": addFallback,
-    "fbRm": kwRemoveFallback,
-    "fbLs": listFallbacks
+    "fbAdd"     : addFallback,
+    "fbRm"      : kwRemoveFallback,
+    "fbLs"      : listFallbacks
 }
 
 doc={
@@ -151,9 +151,9 @@ doc={
     "backup"    : "Sends a backup of the config file to the bot channel",
     "bash"      : "Executes a bash command",
     "exit"      : "Exits the bot",
-    "fbAdd": "Adds a fallback message",
-    "fbRm": "Removes a fallback message",
-    "fbLs": "Lists all fallback messages"
+    "fbAdd"     : "Adds a fallback message",
+    "fbRm"      : "Removes a fallback message",
+    "fbLs"      : "Lists all fallback messages"
 }
 
 
