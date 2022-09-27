@@ -1,5 +1,4 @@
-import json, discord, requests, os, time, random, datetime,asyncio, sys
-
+import json, discord, requests, os, time, random, datetime,asyncio, sys, importlib
 
 async def kwHelp(message):
     global bottie, funcs, doc
@@ -17,7 +16,7 @@ async def kwQuote(message):
     global quote, bottie
     quote=message.content.split("quote")[1]
     print("Quote set to ", quote)
-    await bottie.send(f"Quote set to {quote}")    	
+    await bottie.send(f"Quote set to {quote}")
     saveConfig("config.json")
     return 0
 
@@ -33,7 +32,7 @@ async def kwSetTime(message):
     quoteTime=[int(i) for i in tmpQuoteTime]
     saveConfig("config.json")
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
-    
+
 async def kwBackup(message):
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
@@ -44,14 +43,14 @@ async def kwBackup(message):
         saveConfig("config.json")
         await bottie.send("Sending backup...")
         await bottie.send(file=discord.File("config.json"))
-    
+
 async def kwRestore(message):
     global settings
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        #downloads the config file 
+        #downloads the config file
         url=message.attachments[0]
         file=requests.get(url.url)
         settings=file.json()
@@ -72,20 +71,21 @@ async def kwReset(message):
     global optionals
     optionals=getDefaultOptionals()
 
-async def addFallback(message):
+async def kwAddFallback(message):
     global fallbackmsg
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        fallbackmsg.append(message.content.strip().split(" ")[1])
+        fallbackmsg.append(" ".join(message.content.strip().split(" ")[1:]))
         saveConfig("config.json")
         await message.channel.send("Added fallback message!")
         msg=""
         for i in enumerate(fallbackmsg):
             msg+=f"{i[0]}: {i[1]}\n"
         await message.channel.send(f"Current fallback messages:``` {msg}```")
-async def listFallbacks(message):
+
+async def kwListFallbacks(message):
     global fallbackmsg
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
@@ -95,7 +95,7 @@ async def listFallbacks(message):
         for i in enumerate(fallbackmsg):
             msg+=f"{i[0]}: {i[1]}\n"
         await message.channel.send(f"Current fallback messages:``` {msg}```")
-        
+
 async def kwRemoveFallback(message):
     global fallbackmsg
     if not isInBotchan(message):
@@ -112,7 +112,7 @@ async def kwRemoveFallback(message):
             await message.channel.send(f"Current fallback messages:``` {msg}```")
         except Exception:
             await message.channel.send("Message not found!")
-            
+
 async def kwExit(message):
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
@@ -121,7 +121,19 @@ async def kwExit(message):
         await message.channel.send("Exiting...")
         saveConfig("config.json")
         sys.exit()
-    
+
+async def kwDownloadLib(message):
+    if isInBotchan(message):
+        url=message.attachments[0]
+        file=requests.get(url.url)
+        files=os.listdir()
+        filename="lib"+str(0).zfill(3)+".py"
+        i=-1
+        while not filename in file:
+            i+=1
+            filename="lib"+str(i).zfill(3)+".py"
+        with open("filename","w") as f:
+            f.write(file)
 
 
 #########################
@@ -137,9 +149,9 @@ funcs={
     "backup"    : kwBackup,
     "bash"      : kwBash,
     "exit"      : kwExit,
-    "fbAdd"     : addFallback,
+    "fbAdd"     : kwAddFallback,
     "fbRm"      : kwRemoveFallback,
-    "fbLs"      : listFallbacks
+    "fbLs"      : kwListFallbacks,
 }
 
 doc={
@@ -156,6 +168,16 @@ doc={
     "fbLs"      : "Lists all fallback messages"
 }
 
+libfuncs={}
+def loadLibs():
+    files=os.listdir()
+    filename="lib"+str(0).zfill(3)+".py"
+    i=-1
+    while filename in files:
+        i+=1
+        filename="lib"+str(i).zfill(3)+".py"
+        libname="lib"+str(i).zfill(3)
+        importlib.import_module(name=libname, package=filename)
 
 def regenerateQuote():
     global quote, fallbackmsg
@@ -177,7 +199,7 @@ def getDefaultOptionals():
 
 def loadConfig(name):
     #create the default optionals
-    
+
     try:
         global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime, quote
         with open(name, "r") as f:
@@ -186,7 +208,7 @@ def loadConfig(name):
         wakechan=settings["wakechan"]
         botchan=settings["botchan"]
         prefix=settings["prefix"]
-       
+
         #fallbackmsg=settings["fallbackmsg"]
         validconf=settings["validconf"]
         optionals=getDefaultOptionals()
@@ -204,7 +226,7 @@ def loadConfig(name):
         validconf=0
         configCreator()
 
-                    
+
 def configCreator():
     global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,msg
     settings={}
@@ -215,9 +237,9 @@ def configCreator():
         prefix=input("Please enter the prefix for the bot: ")
         optionals=getDefaultOptionals()
         msg=""
-        
+
         saveConfig("config.json")
-       
+
     else:
         print("""
 No config file found.
@@ -249,6 +271,7 @@ def saveConfig(name,generateOptionals=1):
         json.dump(settings, f)
     print("saved!")
 quoteTime=[0,0]
+
 #intents=discord.Intents.all()
 loadConfig("config.json")
 #client = discord.Bot()
@@ -271,9 +294,12 @@ async def on_message(message):
     if message.author == client.user:
         return
     #print(message)
-    if message.content.startswith(prefix) and message.content[len(prefix):].split(" ")[0] in funcs:
-        await funcs[message.content[len(prefix):].split(" ")[0]](message)
-        
+    if message.content.startswith(prefix):
+        if message.content[len(prefix):].split(" ")[0] in funcs:
+            await funcs[message.content[len(prefix):].split(" ")[0]](message)
+
+        # elif message.content[len(prefix):].split(" ")[0] in libfuncs:
+        #     await libfuncs[message.content[len(prefix):].split(" ")[0]](message)
 async def quotesend():#this is the function which sends the quote at the right time
     await client.wait_until_ready()
     await asyncio.sleep(10)
@@ -298,7 +324,6 @@ async def quotesend():#this is the function which sends the quote at the right t
         else:
             await asyncio.sleep(1)
             print(now.hour,"|",now.minute,"|", now.second, "\t|", quoteTime[0],"|",quoteTime[1],end="\r")
-
 quoteSendActive=1
 if quoteSendActive:
     client.loop.create_task(quotesend())
