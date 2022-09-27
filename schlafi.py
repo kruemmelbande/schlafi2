@@ -1,5 +1,6 @@
 import json, discord, requests, os, time, random, datetime,asyncio, sys, importlib
 
+
 async def kwHelp(message):
     global bottie, funcs, doc
     nl="\n"
@@ -34,15 +35,21 @@ async def kwSetTime(message):
     await bottie.send(f"Time set to {str(quoteTime[0]).zfill(2)}:{str(quoteTime[1]).zfill(2)}")
 
 async def kwBackup(message):
+
     if not isInBotchan(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        #send the config file to the bot channel
         global bottie
-        saveConfig("config.json")
-        await bottie.send("Sending backup...")
-        await bottie.send(file=discord.File("config.json"))
+        if "fromautosave" in message.contents.lower():
+            await bottie.send("Sending last backed up config...")
+            await bottie.send(file=discord.File("backup.json"))
+        else:
+            #send the config file to the bot channel
+
+            saveConfig("config.json")
+            await bottie.send("Sending backup...")
+            await bottie.send(file=discord.File("config.json"))
 
 async def kwRestore(message):
     global settings
@@ -50,12 +57,41 @@ async def kwRestore(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        #downloads the config file
-        url=message.attachments[0]
-        file=requests.get(url.url)
-        settings=file.json()
-        saveConfig("config.json")
+        if "fromautosave" in message.contents.lower():
+            try:
+                loadConfig("backup.json")
+                saveConfig("config.json")
+                await message.channel.send("Command is not allowed in this channel!")
+            except:
+                await message.channel.send("Failed to restore from autosave!")
 
+        else:
+            #DO A BACKUP! (i dont know why i didnt do this before, i wouldnt trust myself with something mission critical)
+            saveConfig("backup.json")
+            #^look past me, this was literally a single line of code, you could have done this before
+
+            #downloads the config file
+            try:
+                url=message.attachments[0]
+                file=requests.get(url.url)
+                settings=file.json()
+                saveConfig("config.json")
+                await message.channel.send("Restore successful!")
+            except:
+                await message.channel.send("Restore failed, undoing changes...")
+                try:
+                    loadConfig("backup.json")
+                    saveConfig("config.json")
+                except:
+                    await message.channel.send("Undoing changes failed! (if you are seing this, i feel sorry for you. Ill force an undo for now, but your config file looks corrupted. You should probably fix that, by creating a new config file.)")
+                    #force an undo
+                    try:
+                        old=open("backup.json","r")
+                        new=open("config.json","w")
+                        #copy the backup file to the config file
+                        new.write(old.read())
+                    except:
+                        await message.channel.send("Cant undo changes (like.. At all)! maybe your disk is full, you dont have write permissions or i messed up my code. \n `F`")
 async def kwBash(message):
     global botchan
     if not isInBotchan(message):
@@ -69,7 +105,9 @@ async def kwBash(message):
 
 async def kwReset(message):
     global optionals
+    saveConfig("backup.json")
     optionals=getDefaultOptionals()
+    saveConfig("config.json")
 
 async def kwAddFallback(message):
     global fallbackmsg
@@ -159,8 +197,8 @@ doc={
     "quote"     : "Sets the quote to be displayed",
     "reset"     : "Partly resets the bot to default settings",
     "setTime"   : "Sets the time when the quote is displayed",
-    "restore"   : "Restores the config file from a backup",
-    "backup"    : "Sends a backup of the config file to the bot channel",
+    "restore"   : "Restores the config file from a backup (You need to attach the backup file to the message), use the restore command with the argument \"fromautosave\" to restore from a local autosave",
+    "backup"    : "Sends a backup of the config file to the bot channel, use the restore command with the argument \"fromautosave\" to send the last autosave instead",
     "bash"      : "Executes a bash command",
     "exit"      : "Exits the bot",
     "fbAdd"     : "Adds a fallback message",
