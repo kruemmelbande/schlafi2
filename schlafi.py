@@ -11,7 +11,7 @@ async def kwHelp(message):
         else:
             out+=f"{i}\n"
     out+="```"
-    await bottie.send(out)
+    await message.channel.send(out)
 
 async def kwQuote(message):
     global quote, bottie
@@ -160,18 +160,6 @@ async def kwExit(message):
         saveConfig("config.json")
         sys.exit()
 
-async def kwDownloadLib(message):
-    if isInBotchan(message):
-        url=message.attachments[0]
-        file=requests.get(url.url)
-        files=os.listdir()
-        filename="lib"+str(0).zfill(3)+".py"
-        i=-1
-        while not filename in file:
-            i+=1
-            filename="lib"+str(i).zfill(3)+".py"
-        with open("filename","w") as f:
-            f.write(file)
 
 
 #########################
@@ -205,17 +193,6 @@ doc={
     "fbRm"      : "Removes a fallback message",
     "fbLs"      : "Lists all fallback messages"
 }
-
-libfuncs={}
-def loadLibs():
-    files=os.listdir()
-    filename="lib"+str(0).zfill(3)+".py"
-    i=-1
-    while filename in files:
-        i+=1
-        filename="lib"+str(i).zfill(3)+".py"
-        libname="lib"+str(i).zfill(3)
-        importlib.import_module(name=libname, package=filename)
 
 def regenerateQuote():
     global quote, fallbackmsg
@@ -310,14 +287,11 @@ def saveConfig(name,generateOptionals=1):
     print("saved!")
 quoteTime=[0,0]
 
-#intents=discord.Intents.all()
 loadConfig("config.json")
-#client = discord.Bot()
 intents = discord.Intents.default()
 intents.message_content = True
 intents.emojis_and_stickers = True
 intents.auto_moderation_configuration=True
-#intents.all=True
 client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
@@ -336,8 +310,6 @@ async def on_message(message):
         if message.content[len(prefix):].split(" ")[0] in funcs:
             await funcs[message.content[len(prefix):].split(" ")[0]](message)
 
-        # elif message.content[len(prefix):].split(" ")[0] in libfuncs:
-        #     await libfuncs[message.content[len(prefix):].split(" ")[0]](message)
 async def quotesend():#this is the function which sends the quote at the right time
     await client.wait_until_ready()
     await asyncio.sleep(10)
@@ -356,12 +328,12 @@ async def quotesend():#this is the function which sends the quote at the right t
                 await bottie.send("New quote: "+str(quote))
             except Exception as e:
                 await bottie.send(f"Error sending quote: {e}")
-            #quote=random.choice(default_quotes)
             print("quote sent")
             await asyncio.sleep(61)
         else:
             await asyncio.sleep(1)
-            print(now.hour,"|",now.minute,"|", now.second, "\t|", quoteTime[0],"|",quoteTime[1],end="\r")
+            print(now.hour,"|",now.minute,"|", now.second, "\t|", quoteTime[0],"|",quoteTime[1],"XX    ",end="\r")
+
 quoteSendActive=1
 if quoteSendActive:
     client.loop.create_task(quotesend())
