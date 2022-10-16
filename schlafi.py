@@ -101,8 +101,16 @@ async def kwBash(message):
         command=message.content.split("bash")[1]
         print("Executing bash command: ", command)
         out=subprocess.check_output(command, shell=True)
-        await message.channel.send(f"Bash command executed! \n Output:\n```{out.decode('utf-8')}```")
-
+        try:
+            await message.channel.send(f"Bash command executed! \n Output:\n```{out.decode('utf-8')}```")
+        except:
+            await message.channel.send("Bash command executed! \n Output:\n```(too long to display)```")
+            with open("bashout.txt","w") as f:
+                f.write(out.decode('utf-8'))
+            try:
+                await message.channel.send(file=discord.File("bashout.txt"))
+            except:
+                print("Failed to send bash output. Either output is too long or i messed up my code.")
 async def kwReset(message):
     global optionals
     saveConfig("backup.json")
