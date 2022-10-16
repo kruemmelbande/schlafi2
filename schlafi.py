@@ -1,4 +1,4 @@
-import json, discord, requests, os, time, random, datetime,asyncio, sys, importlib
+import json, discord, requests, os, time, random, datetime,asyncio, sys, importlib,subprocess
 
 
 async def kwHelp(message):
@@ -99,9 +99,9 @@ async def kwBash(message):
         return 1
     else:
         command=message.content.split("bash")[1]
-        print(command)
-        os.system(command)
-        await message.channel.send("Bash command executed!")
+        print("Executing bash command: ", command)
+        out=subprocess.check_output(command, shell=True)
+        await message.channel.send(f"Bash command executed! \n Output:\n```{out.decode('utf-8')}```")
 
 async def kwReset(message):
     global optionals
