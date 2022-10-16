@@ -101,6 +101,7 @@ async def kwBash(message):
         command=message.content.split("bash")[1]
         global timeout
         print("Executing bash command: ", command)
+        await message.channel.send("Executing bash command: "+command)
         try:
             out=subprocess.check_output(command, shell=True, timeout=timeout)
         except subprocess.CalledProcessError as e:
