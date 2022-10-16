@@ -99,8 +99,12 @@ async def kwBash(message):
         return 1
     else:
         command=message.content.split("bash")[1]
+        global timeout
         print("Executing bash command: ", command)
-        out=subprocess.check_output(command, shell=True)
+        try:
+            out=subprocess.check_output(command, shell=True, timeout=timeout)
+        except subprocess.CalledProcessError as e:
+            await message.channel.send(f"Command returned error code {e.returncode}")
         try:
             await message.channel.send(f"Bash command executed! \n Output:\n```{out.decode('utf-8')}```")
         except:
@@ -218,6 +222,7 @@ def getDefaultOptionals():
     optionals["lastmsg"]="Error loading quote"
     optionals["lasttime"]=(0,0)
     optionals["fallbackmsg"]=["Error loading quote"]
+    optionals["bashTimeout"]=9999
     return optionals
 
 def loadConfig(name):
@@ -285,6 +290,7 @@ def saveConfig(name,generateOptionals=1):
             optionals["lasttime"]=quoteTime
             optionals["lastmsg"]=quote
             optionals["fallbackmsg"]=fallbackmsg
+            optionals["bashTimeout"]=timeout
             print("Optionals generated!")
     except Exception as e:
         print(f"Not generating optionals, {e}")
