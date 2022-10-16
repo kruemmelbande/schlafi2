@@ -250,6 +250,7 @@ def loadConfig(name):
         quote=optionals["lastmsg"]
         quoteTime=optionals["lasttime"]
         fallbackmsg=optionals["fallbackmsg"]
+        timout=optionals["bashTimeout"]
     except Exception as e:
         print(e)
         validconf=0
