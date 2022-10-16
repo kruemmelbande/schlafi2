@@ -191,7 +191,7 @@ funcs={
     "fbRm"      : kwRemoveFallback,
     "fbLs"      : kwListFallbacks,
 }
-
+firstLogin=1
 doc={
     "help"      : "Shows this message",
     "quote"     : "Sets the quote to be displayed",
@@ -309,12 +309,15 @@ intents.auto_moderation_configuration=True
 client = discord.Client(intents=intents)
 @client.event
 async def on_ready():
-    global wakie,bottie,wakechan,botchan,prefix,lastmsg,fallbackmsg,validconf
-
-    bottie=client.get_channel(int(botchan))
-    wakie=client.get_channel(int(wakechan))
-    print(f' logged in as {client.user} \n To get started type `{prefix}help`')
-    await bottie.send(f' logged in as `{client.user}` \n To get started type `{prefix}help`')
+    global wakie,bottie,wakechan,botchan,prefix,lastmsg,fallbackmsg,validconf,firstLogin
+    if firstLogin:
+        bottie=client.get_channel(int(botchan))
+        wakie=client.get_channel(int(wakechan))
+        print(f' logged in as {client.user} \n To get started type `{prefix}help`')
+        await bottie.send(f' logged in as `{client.user}` \n To get started type `{prefix}help`')
+    else:
+        await bottie.send("reconnected at "+str(datetime.datetime.now()))
+        print("reconnected at "+str(datetime.datetime.now()))
 @client.event
 async def on_message(message):
     if message.author == client.user:
