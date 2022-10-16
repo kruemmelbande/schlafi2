@@ -106,6 +106,7 @@ async def kwBash(message):
             out=subprocess.check_output(command, shell=True, timeout=timeout)
         except subprocess.CalledProcessError as e:
             await message.channel.send(f"Command returned error code {e.returncode}")
+            return 1
         try:
             await message.channel.send(f"Bash command executed! \n Output:\n```{out.decode('utf-8')}```")
         except:
