@@ -41,7 +41,7 @@ async def kwBackup(message):
         return 1
     else:
         global bottie
-        if "fromautosave" in message.contents.lower():
+        if "fromautosave" in message.content.lower():
             await bottie.send("Sending last backed up config...")
             await bottie.send(file=discord.File("backup.json"))
         else:
