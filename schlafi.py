@@ -230,7 +230,7 @@ def loadConfig(name):
     #create the default optionals
 
     try:
-        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime, quote
+        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime, quote, timeout
         with open(name, "r") as f:
             settings=json.load(f)
         token=settings["token"]
@@ -276,7 +276,7 @@ Please put a config file in the same directory as the bot.
  """)
 def saveConfig(name,generateOptionals=1):
     print("saving...")
-    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals, quote
+    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals, quote,timeout
     settings={}
     settings["token"]=token
     settings["wakechan"]=wakechan
