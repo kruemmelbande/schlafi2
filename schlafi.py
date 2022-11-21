@@ -61,7 +61,6 @@ async def kwRestore(message):
             try:
                 loadConfig("backup.json")
                 saveConfig("config.json")
-                await message.channel.send("Command is not allowed in this channel!")
             except:
                 await message.channel.send("Failed to restore from autosave!")
 
@@ -75,6 +74,7 @@ async def kwRestore(message):
                 url=message.attachments[0]
                 file=requests.get(url.url)
                 settings=file.json()
+                print("Restored config: \n ", settings)
                 saveConfig("config.json")
                 await message.channel.send("Restore successful!")
             except:
