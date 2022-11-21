@@ -231,7 +231,8 @@ doc={
     "exit"      : "Exits the bot",
     "fbAdd"     : "Adds a fallback message",
     "fbRm"      : "Removes a fallback message",
-    "fbLs"      : "Lists all fallback messages"
+    "fbLs"      : "Lists all fallback messages",
+    "whatIs"    : "If enabled, you can use it with a link or attachment to get the title of the music in a video or audio file"
 }
 
 def regenerateQuote():
