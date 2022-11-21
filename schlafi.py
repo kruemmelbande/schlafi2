@@ -74,7 +74,9 @@ async def kwRestore(message):
                 url=message.attachments[0]
                 file=requests.get(url.url)
                 settings=file.json()
-                print("Restored config: \n ", settings)
+                with open("config.json","w") as f:
+                    f.write(json.dumps(settings, indent=4))
+                loadConfig("config.json")
                 saveConfig("config.json")
                 await message.channel.send("Restore successful!")
             except:
