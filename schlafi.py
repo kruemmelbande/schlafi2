@@ -57,7 +57,7 @@ async def kwRestore(message):
         await message.channel.send("Command is not allowed in this channel!")
         return 1
     else:
-        if "fromautosave" in message.contents.lower():
+        if "fromautosave" in message.content.lower():
             try:
                 loadConfig("backup.json")
                 saveConfig("config.json")
