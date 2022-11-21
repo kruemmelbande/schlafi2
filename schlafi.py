@@ -359,9 +359,8 @@ def saveConfig(name,generateOptionals=1):
             optionals["lastmsg"]=quote
             optionals["fallbackmsg"]=fallbackmsg
             optionals["bashTimeout"]=timeout
-            if audEnabled:
-                optionals["audEnabled"]=True
-                optionals["audToken"]=audToken
+            optionals["audEnabled"]=audEnabled
+            optionals["audToken"]=audToken
             print("Optionals generated!")
     except Exception as e:
         print(f"Not generating optionals, {e}")
