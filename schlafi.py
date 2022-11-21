@@ -174,7 +174,32 @@ async def kwExit(message):
         saveConfig("config.json")
         sys.exit()
 
-
+async def kwWhatIs(message):
+    global settings, audEnabled, audToken
+    if not audEnabled:
+        await message.channel.send("Aud is not enabled!")
+        return 0
+    if len(message.content.strip().split(" "))>1:
+        #we probably have a link there
+        print("url")
+        url=message.content.strip().split(" ")[-1]
+        await message.channel.send(audResolve(url))
+    else:
+        #we probably have an attachment
+        print("attachment")
+        try:
+            attachment=message.attachments[0]
+            url=attachment.url
+            print("\n",url, " : ", message.attachments)
+            if url!=None:
+                await message.channel.send(audResolve(url))
+                return
+        except Exception as e:
+            print(e)
+        await message.channel.send("No attachment or link found!")
+            
+            
+        
 
 #########################
 #all the stuff goes here#
@@ -192,6 +217,7 @@ funcs={
     "fbAdd"     : kwAddFallback,
     "fbRm"      : kwRemoveFallback,
     "fbLs"      : kwListFallbacks,
+    "whatIs"    : kwWhatIs
 }
 firstLogin=1
 doc={
@@ -219,19 +245,48 @@ def isInBotchan(message):
         print(f"missmatch: {botchan} vs {message.channel.id}")
     return re
 
+def audResolve(url):
+    global audEnabled, audToken
+    if not audEnabled:
+        return "Aud is not enabled!"
+    try:
+        data = {
+        'api_token': audToken,
+        "url": url,
+        'return': 'spotify',
+        }
+        result = requests.post('https://api.audd.io/', data=data)
+        out=result.json()
+        res=""
+        if out['status'] == 'success':
+            r=out['result']
+            res+=(f"Song recognized as: {r['artist']} - {r['title']} ({r['release_date']})\n")
+            res+=(f"Song link: {r['song_link']} \n")
+            res+=(f"Spotify: {r['spotify']['external_urls']['spotify']}") if r['spotify'] else print("Spotify: Not found")
+            return res
+        print(json.dumps(out, indent=4))
+        return "Song not found!"
+
+
+    except Exception as e:
+        print(e, url)
+        return "Failed to find match."
+
 def getDefaultOptionals():
     optionals={}
     optionals["lastmsg"]="Error loading quote"
     optionals["lasttime"]=(0,0)
     optionals["fallbackmsg"]=["Error loading quote"]
     optionals["bashTimeout"]=9999
+    optionals["audEnabled"]=False
+    optionals["audToken"]=None
     return optionals
 
 def loadConfig(name):
     #create the default optionals
 
     try:
-        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime, quote, timeout
+        global settings, token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf,optionals, quoteTime, quote, timeout, audEnabled, audToken
         with open(name, "r") as f:
             settings=json.load(f)
         token=settings["token"]
@@ -252,6 +307,12 @@ def loadConfig(name):
         quoteTime=optionals["lasttime"]
         fallbackmsg=optionals["fallbackmsg"]
         timeout=optionals["bashTimeout"]
+        if optionals["audEnabled"]:
+            audEnabled=True
+            audToken=optionals["audToken"]
+        else:
+            audEnabled=False
+            audToken=None
     except Exception as e:
         print(e)
         validconf=0
@@ -267,6 +328,9 @@ def configCreator():
         wakechan=int(input("Please enter the channel ID of the wake channel: "))
         prefix=input("Please enter the prefix for the bot: ")
         optionals=getDefaultOptionals()
+        if input("Do you want to enable the aud.io integration?").lower().strip()=="y":
+            optionals["audEnabled"]=True
+            optionals["audToken"]=input("Please enter your aud.io token: ").strip()
         msg=""
 
         saveConfig("config.json")
@@ -278,7 +342,7 @@ Please put a config file in the same directory as the bot.
  """)
 def saveConfig(name,generateOptionals=1):
     print("saving...")
-    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals, quote,timeout
+    global token, prefix, wakechan, botchan, lastmsg, fallbackmsg, validconf, quoteTime,optionals, quote,timeout, audEnabled, audToken
     settings={}
     settings["token"]=token
     settings["wakechan"]=wakechan
@@ -294,13 +358,16 @@ def saveConfig(name,generateOptionals=1):
             optionals["lastmsg"]=quote
             optionals["fallbackmsg"]=fallbackmsg
             optionals["bashTimeout"]=timeout
+            if audEnabled:
+                optionals["audEnabled"]=True
+                optionals["audToken"]=audToken
             print("Optionals generated!")
     except Exception as e:
         print(f"Not generating optionals, {e}")
     settings["optionals"]=optionals
     print(settings)
     with open(name, "w") as f:
-        json.dump(settings, f)
+        json.dump(settings, f, indent=4)
     print("saved!")
 quoteTime=[0,0]
 
