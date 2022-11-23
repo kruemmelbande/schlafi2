@@ -181,11 +181,13 @@ async def kwWhatIs(message):
     if not audEnabled:
         await message.channel.send("Aud is not enabled!")
         return 0
-    if len(message.content.strip().split(" "))>1:
+    humming=" !humming" in message.content.lower()
+    content=message.content.replace(" !humming","").strip()
+    if len(content.split(" "))>1:
         #we probably have a link there
         print("url")
-        url=message.content.strip().split(" ")[-1]
-        await message.channel.send(audResolve(url))
+        url=content.split(" ")[-1]
+        await message.channel.send(audResolve(url, humming))
     else:
         #we probably have an attachment
         print("attachment")
@@ -194,7 +196,7 @@ async def kwWhatIs(message):
             url=attachment.url
             print("\n",url, " : ", message.attachments)
             if url!=None:
-                await message.channel.send(audResolve(url))
+                await message.channel.send(audResolve(url, humming))
                 return
         except Exception as e:
             print(e)
@@ -248,7 +250,7 @@ def isInBotchan(message):
         print(f"missmatch: {botchan} vs {message.channel.id}")
     return re
 
-def audResolve(url):
+def audResolve(url, humming=False):
     global audEnabled, audToken
     if not audEnabled:
         return "Aud is not enabled!"
@@ -258,19 +260,27 @@ def audResolve(url):
         "url": url,
         'return': 'spotify',
         }
-        result = requests.post('https://api.audd.io/', data=data)
+        if humming:
+            result = requests.post('https://api.audd.io/recognizeWithOffset/', data=data)
+        else:
+            result = requests.post('https://api.audd.io/', data=data)
         out=result.json()
         res=""
-        if out['status'] == 'success':
-            r=out['result']
-            res+=(f"Song recognized as: {r['artist']} - {r['title']} ({r['release_date']})\n")
-            res+=(f"Song link: {r['song_link']} \n")
-            res+=(f"Spotify: {r['spotify']['external_urls']['spotify']}") if r['spotify'] else print("Spotify: Not found")
-            return res
-        print(json.dumps(out, indent=4))
-        return "Song not found!"
-
-
+        if not humming:
+            if out['status'] == 'success':
+                r=out['result']
+                res+=(f"Song recognized as: {r['artist']} - {r['title']} ({r['release_date']})\n")
+                res+=(f"Song link: {r['song_link']} \n")
+                res+=(f"Spotify: {r['spotify']['external_urls']['spotify']}") if r['spotify'] else print("Spotify: Not found")
+                return res
+            print(json.dumps(out, indent=4))
+            return f"Song not found! (Maybe try {prefix}whatIs !humming {url})"
+        else:
+            print(json.dumps(out, indent=4))
+            r="The possible results are:\n"
+            for i in out['result']["list"]:
+                r+=f"{i['artist']} - {i['title']} ({i['score']}% certain)\n"
+            return r
     except Exception as e:
         print(e, url)
         return "Failed to find match."
