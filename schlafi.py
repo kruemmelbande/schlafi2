@@ -266,6 +266,13 @@ def audResolve(url, humming=False):
             result = requests.post('https://api.audd.io/', data=data)
         out=result.json()
         res=""
+        if not out["status"] == "success":
+            if "error" in out:
+                if "error_message" in out["error"]:
+                    r="There was an error finding the song: ```"+out["error"]["error_message"]+"```"
+                    return r
+            print(out)
+            return "There was an error finding the song!"
         if not humming:
             if out['status'] == 'success':
                 r=out['result']
@@ -276,11 +283,12 @@ def audResolve(url, humming=False):
             print(json.dumps(out, indent=4))
             return f"Song not found! (Maybe try {prefix}whatIs !humming {url})"
         else:
-            print(json.dumps(out, indent=4))
-            r="The possible results are:\n"
-            for i in out['result']["list"]:
-                r+=f"{i['artist']} - {i['title']} ({i['score']}% certain)\n"
-            return r
+            if out['status'] == 'success':
+                print(json.dumps(out, indent=4))
+                r="The possible results are:\n"
+                for i in out['result']["list"]:
+                    r+=f"{i['artist']} - {i['title']} ({i['score']}% certain)\n"
+                return r
     except Exception as e:
         print(e, url)
         return "Failed to find match."
