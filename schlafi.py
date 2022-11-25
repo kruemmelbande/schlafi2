@@ -242,6 +242,7 @@ doc={
 def regenerateQuote():
     global quote, fallbackmsg
     quote=random.choice(fallbackmsg)
+    saveConfig("config.json")
 
 def isInBotchan(message):
     global botchan
